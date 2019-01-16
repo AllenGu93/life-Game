@@ -1,0 +1,37 @@
+让我们来看一下Canvas内置的简单几何图形 — 矩形的绘制。在Canvas中，绘制矩形有三种方法：填充(fillRect)、描边(StrokeRect)以及清除(clearRect)。当然，我们也可以使用“路径”来描绘包括矩形在内的所有图形。
+
+以下是上述三种方法的API:
+
+1.fillRect(x,y,width,height)。绘制一个从(x,y)开始，宽度为width，高度为height的实心矩形。
+
+2.strokeRect(x,y,width,height)。绘制一个从(x,y)开始，宽度为width，高度为height的矩形框。该矩形框会根据当前设置的strokeStyle、lineWidth、lineJoin和miterLimit属性的不同而渲染成不同的样式。
+
+3.clearRect(x,y,width,height)。清除从(x,y)开始，宽度为width，高度为height的矩形区域，使之完全透明。
+
+在调用上述方法绘制Canvas之前，我们需要设定填充和描边的样式。设定这些样式最基本的方法是使用24位色（用16进制字符串表示）。以下是一个简单的例子：
+
+代码如下:
+
+context.fillStyle = "#000000";
+
+context.strokeStyle = "#ff00ff";
+
+在下面的例子中，填充色设定为黑色，而描边色则设定为紫色：
+
+代码如下:
+
+function drawScreen() {
+
+context.fillStyle = "#000000";
+
+context.strokeStyle = "#ff00ff";
+
+context.lineWidth = 2;
+
+context.fillRect(10, 10, 40, 40);
+
+context.strokeRect(0, 0, 60, 60);
+
+context.clearRect(20, 20, 20, 20);
+
+}

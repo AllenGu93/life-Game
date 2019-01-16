@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0104)file:///D:/%E4%B8%8B%E8%BD%BD/%E6%B8%B8%E6%88%8F/js/%E7%94%9F%E5%91%BD%E6%B8%B8%E6%88%8F/Life%20Game.htm -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<title>Life Game</title>
+		<script type="text/javascript" src="./Life Game四_files/vector2d.js"></script>
+		<script type="text/javascript" src="./Life Game四_files/lifegame.js"></script>
+		<script type="text/javascript" src="./Life Game四_files/map.js"></script>
+		<script type="text/javascript" src="./Life Game四_files/cell.js"></script>
+		<script type="text/javascript" src="./Life Game四_files/color.js"></script>
+		<!-- <script type="text/javascript" src="js/stats.min.js"></script> -->
+
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				position: relative;
+			}
+			fieldset {
+				padding: 10px;
+				margin-bottom: 10px;
+			}
+			#canvas {
+				position: relative;
+				float: left;
+				overflow: hidden;
+			}
+			#lifegame {
+				cursor: default;
+			}
+			#mouse_info_fieldset {
+				width: 80px;
+				position: absolute;
+				bottom: 0px;
+				left: 0px;
+				font-size: 12px;
+				font-family: arial, sans-serif;
+				padding: 3px;
+				margin: 0px;
+				background-color: rgba(0, 0, 0, 0.85);
+				color: #fff;
+				border: 2px solid #000;
+			}
+			#mouse_info_fieldset label {
+				display: block;
+			}
+			#mouse_info_fieldset #fps {
+				background: transparent;
+				border: none;
+				float: right;
+				display: inline;
+				width: 50px;
+				text-align: right;
+				color: yellow;
+			}
+			#mouse_info_fieldset label span {
+				float: right;
+			}
+			#tool_box {
+				float: left;
+				width: 50%;
+				border: 10px solid transparent;
+				box-sizing: border-box;
+			}
+			#tool_box label {
+				display: block;
+				margin-bottom: 5px;
+			}
+			#tool_box button {
+				width: 100px;
+				height: 50px;
+			}
+			#world_status {
+				color: red;
+			}
+			#tool_box #create_world {
+				height: 81px;
+				float: right;
+				position: absolute;
+				top: 18px;
+				right: 10px;
+			}
+
+		</style>
+	</head>
+	<body>
+		<div id="canvas">
+			<canvas id="lifegame" width="720" height="720"></canvas>
+			<fieldset id="mouse_info_fieldset" style="left: 0px;">
+				<label>x <span id="x">528</span> </label>
+				<label>y <span id="y">92</span> </label>
+				<label>Line <span id="yb">1</span> </label>
+				<label>Colunm <span id="xb">7</span> </label>
+				<label>Fps
+					<input id="fps" disabled="disabled" value="0">
+				</label>
+
+			</fieldset>
+		</div>
+		<div id="tool_box">
+			<fieldset id="world_info">
+				<legend>
+					World Info: <span id="world_status">Stop</span>
+				</legend>
+				<label>Speed:
+					<input id="speed">
+				</label>
+				<label>LivingCells:
+					<input id="living_cells">
+				</label>
+			</fieldset>
+			<fieldset>
+				<legend>
+					Console
+				</legend>
+				<fieldset>
+					<legend>
+						Create World
+					</legend>
+					<label> Lines：
+						<input id="lines" type="number" min="1" max="100" value="40">
+					</label>
+					<label> Columns：
+						<input id="columns" type="number" min="1" max="100" value="40">
+					</label>
+					<label> Living Cells：
+						<input id="need_cells" type="number" min="1" value="80">
+					</label>
+					<button id="create_world">
+						Create
+					</button>
+				</fieldset>
+
+				<button id="clear_world">
+					Clear World
+				</button>
+				<button id="startTaggle">Start</button>
+				<button id="one_step">
+					One Step
+				</button>
+				<button id="fastter">
+					Fastter
+				</button>
+				<button id="lower">
+					Lower
+				</button>
+			</fieldset>
+
+		</div>
+
+		<script type="text/javascript">
+			function $(e) {
+				return document.getElementById(e);
+			}
+
+			function addEvent(obj, type, fun) {
+				obj = $(obj);
+				if (obj.addEventListener) {
+					obj.addEventListener(type, fun, false);
+					return true;
+				} else if (obj.attachEvent) {
+					return obj.attachEvent("on" + type, fun);
+				} else {
+					return false;
+				}
+			};
+			window.onload = function() {
+				lifegame = new LifeGame('lifegame', 10, 10, 40);
+				$("mouse_info_fieldset").style["left"] = "0px";
+				cellx = celly = 0;
+				mouseDown = false;
+				cellStatusHasChange = false;
+				addEvent("lifegame", "mousemove", function(ev) {
+					ev = ev || window.event;
+					var mousePos = mousePosition(ev);
+					if (cellx != Math.ceil(mousePos.x / game.map.cellWidth) - 1 || celly != Math.ceil(mousePos.y / game.map.cellHeight) - 1)
+						cellStatusHasChange = false;
+					cellx = Math.ceil(mousePos.x / lifegame.map.cellWidth) - 1;
+					celly = Math.ceil(mousePos.y / lifegame.map.cellHeight) - 1;
+					$('x').innerHTML = mousePos.x;
+					$('y').innerHTML = mousePos.y;
+					$('xb').innerHTML = cellx;
+					$('yb').innerHTML = celly;
+					if (mouseDown && !cellStatusHasChange) {
+						lifegame.changeCellStatus(lifegame.map.mapArray[celly][cellx]);
+						cellStatusHasChange = true;
+					}
+				})
+				addEvent("lifegame", "mousedown", function() {
+					mouseDown = true;
+				})
+				addEvent("lifegame", "mouseup", function() {
+					mouseDown = false;
+				})
+				addEvent("lifegame", "mouseleave", function() {
+					mouseDown = false;
+				})
+				addEvent("lifegame", "click", function() {
+					if (!mouseDown && !cellStatusHasChange) {
+						lifegame.changeCellStatus(lifegame.map.mapArray[celly][cellx]);
+					}
+					cellStatusHasChange = false;
+				})
+				addEvent("create_world", "click", function() {
+					lifegame.createMap(lifegame.map.canvasId, $("lines").value, $("columns").value, $("need_cells").value);
+				})
+				addEvent("clear_world", "click", function() {
+					lifegame.clearMap();
+				})
+				addEvent("startTaggle", "click", function() {
+					if (lifegame.intervalNumber == -1) {
+						lifegame.startGame();
+					} else {
+						lifegame.stop();
+					}
+				})
+				addEvent("one_step", "click", function() {
+					if (lifegame.intervalNumber != -1)
+						lifegame.stop();
+					lifegame.map.draw();
+					lifegame.map.render();
+				})
+				addEvent("fastter", "click", function() {
+					if (lifegame.speed > 10) {
+						lifegame.speed -= 10;
+						lifegame.stop();
+						$("speed").value = game.speed;
+					}
+				})
+				addEvent("lower", "click", function() {
+					lifegame.speed += 10;
+					lifegame.stop();
+					$("speed").value = game.speed;
+				})
+				addEvent("mouse_info_fieldset", "mouseover", function() {
+					if (this.style["left"] == "0px") {
+						this.style["left"] = "auto";
+						this.style["right"] = "0px";
+					} else if (this.style["right"] == "0px") {
+						this.style["right"] = "auto";
+						this.style["left"] = "0px";
+					}
+				})
+				window.setInterval(setFps, 1000);
+				function setFps() {
+					$("fps").value = lifegame.map.fps;
+					lifegame.map.fps = 0;
+				}
+
+				function mousePosition(ev) {
+					if (ev.pageX || ev.pageY) {
+						return {
+							x : ev.pageX,
+							y : ev.pageY
+						};
+					}
+					return {
+						x : ev.clientX + document.body.scrollLeft - document.body.clientLeft,
+						y : ev.clientY + document.body.scrollTop - document.body.clientTop
+					};
+				}
+
+			}
+			//window.document.oncontextmenu = function() {
+			//	return true;
+			//}//禁止鼠标右键
+
+			//document.onselectstart = new Function('event.returnValue=false;');
+			//禁止鼠标选择
+		</script>
+	
+
+</body></html>
